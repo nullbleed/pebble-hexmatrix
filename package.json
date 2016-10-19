@@ -25,13 +25,13 @@
     "resources": {
         "media": [{
             "type": "font",
-            "name": "FONT_TERMINESS_20",
+            "name": "FONT_TERMINESS_24",
             "file":"TerminusTTF-4.40.1.ttf",
             "compatibility": "2.7"
         },
         {
             "type": "font",
-            "name": "FONT_TERMINESS_BOLD_20",
+            "name": "FONT_TERMINESS_BOLD_24",
             "file":"TerminusTTF-Bold-4.40.1.ttf",
             "compatibility": "2.7"
         }]

@@ -38,15 +38,15 @@ static char s_time_buffer[15];
 // render selected text layer
 static void render_row(int row) {
     if (row == TEXT_LAYER_TIME) {
-        snprintf(s_buffers[row], 15, "%02X          %02X", randoms[6], randoms[7]);
+        snprintf(s_buffers[row], 15, "%01X          %01X", randoms[6] % 16, randoms[7] % 16);
     } else if (row == TEXT_LAYER_DATE) {
-        snprintf(s_buffers[row], 15, "%02X %02X %02X %02X %02X", randoms[0], s_day, s_month, s_year, randoms[1]);
+        snprintf(s_buffers[row], 15, "%01X %02X %02X %02X %01X", randoms[0] % 16, s_day, s_month, s_year, randoms[1] % 16);
     } else if (row == TEXT_LAYER_WEEKDAY) {
-        snprintf(s_buffers[row], 15, "%02X %02X %02X %02X %02X", randoms[2], randoms[3], s_weekday, randoms[4], randoms[5]);
+        snprintf(s_buffers[row], 15, "%01X %02X %02X %02X %01X", randoms[2] % 16, randoms[3], s_weekday, randoms[4], randoms[5] % 16);
     } else if (row == TEXT_LAYER_RFFU) {
-        snprintf(s_buffers[row], 15, "%02X %02X %02X %02X %02X", randoms[8], randoms[9], randoms[10], randoms[11], randoms[12]);
+        snprintf(s_buffers[row], 15, "%01X %02X %02X %02X %01X", randoms[8] % 16, randoms[9], randoms[10], randoms[11], randoms[12] % 16);
     } else if (row == TEXT_LAYER_STAT) {
-        snprintf(s_buffers[row], 15, "%02X %02X %02X %02X %02X", randoms[13], s_connected, randoms[14], s_battery_level, randoms[15]);
+        snprintf(s_buffers[row], 15, "%01X %02X %02X %02X %01X", randoms[13] % 16, s_connected, randoms[14], s_battery_level, randoms[15] % 16);
     }
 
     if (row >= 0 && row < 6) {
@@ -173,12 +173,12 @@ static void main_window_load(Window *window) {
     window_set_background_color(s_main_window, s_background_color);
 
     // get font
-    s_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_TERMINESS_20));
-    s_time_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_TERMINESS_BOLD_20));
+    s_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_TERMINESS_24));
+    s_time_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_TERMINESS_BOLD_24));
 
     // create text layers
     for (int i = 0; i < 5; ++i) {
-        TextLayer *layer = s_hex_layers[i] = text_layer_create(GRect(0, 8 + (i * 32), bounds.size.w, 20));
+        TextLayer *layer = s_hex_layers[i] = text_layer_create(GRect(0, 4 + (i * 32), bounds.size.w, 24));
 
         // set options for text layer
         text_layer_set_background_color(layer, GColorClear);
@@ -188,7 +188,8 @@ static void main_window_load(Window *window) {
     }
 
     // create time text layer
-    s_time_layer = text_layer_create(GRect(0, 72, bounds.size.w, 22));
+    //TODO: fix this weird offsets caused by the bigger font size
+    s_time_layer = text_layer_create(GRect(-26, 68, bounds.size.w + 50, 24));
 
     // set options for the time text layer
     text_layer_set_background_color(s_time_layer, GColorClear);
