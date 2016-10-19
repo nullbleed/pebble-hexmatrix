@@ -8,12 +8,13 @@
 
 
 static Window *s_main_window;
+static GFont s_font;
 static GFont s_time_font;
 
 static TextLayer *s_hex_layers[5];
 static TextLayer *s_time_layer;
 
-// TODO: change colors
+// TODO: change colors - from settings panel
 static GColor s_main_color = GColorWhite;
 static GColor s_accent_color = GColorCyan;
 static GColor s_background_color = GColorBlack;
@@ -153,6 +154,8 @@ static void connection_callback(bool connected) {
     render_row(TEXT_LAYER_STAT);
 }
 
+//TODO: load and deploy settings
+
 // initialize the different layers when the window is created
 static void main_window_load(Window *window) {
     // get root layer and boundaries of the watch
@@ -163,7 +166,8 @@ static void main_window_load(Window *window) {
     window_set_background_color(s_main_window, s_background_color);
 
     // get font
-    s_time_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_TERMINESS_20));
+    s_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_TERMINESS_20));
+    s_time_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_TERMINESS_BOLD_20));
 
     // create text layers
     for (int i = 0; i < 5; ++i) {
@@ -172,12 +176,12 @@ static void main_window_load(Window *window) {
         // set options for text layer
         text_layer_set_background_color(layer, GColorClear);
         text_layer_set_text_color(layer, s_accent_color);
-        text_layer_set_font(layer, s_time_font);
+        text_layer_set_font(layer, s_font);
         text_layer_set_text_alignment(layer, GTextAlignmentCenter);
     }
 
     // create time text layer
-    s_time_layer = text_layer_create(GRect(0, 72, bounds.size.w, 20));
+    s_time_layer = text_layer_create(GRect(0, 72, bounds.size.w, 22));
 
     // set options for the time text layer
     text_layer_set_background_color(s_time_layer, GColorClear);
