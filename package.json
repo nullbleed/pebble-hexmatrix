@@ -1,0 +1,34 @@
+{
+  "name": "hex",
+  "author": "Daniel Jankowski",
+  "version": "1.0.0",
+  "keywords": ["pebble-app"],
+  "private": true,
+  "dependencies": {},
+  "pebble": {
+    "displayName": "hex",
+    "uuid": "286c2d2e-1313-4564-a996-76fbbf744bf4",
+    "sdkVersion": "3",
+    "enableMultiJS": true,
+    "targetPlatforms": [
+      "aplite",
+      "basalt",
+      "chalk",
+      "diorite"
+    ],
+    "watchapp": {
+      "watchface": true
+    },
+    "messageKeys": [
+      "dummy"
+    ],
+    "resources": {
+        "media": [{
+            "type": "font",
+            "name": "FONT_TERMINESS_20",
+            "file":"TerminusTTF-Bold-4.40.1.ttf",
+            "compatibility": "2.7"
+        }]
+    }
+  }
+}
