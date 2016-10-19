@@ -27,17 +27,12 @@ static int s_month;
 static int s_day;
 
 static int s_weekday;
-//static int s_connected;
+static int s_connected;
 static int s_battery_level;
 
 static int randoms[16];
 static char *s_buffers[6];
 static char s_time_buffer[15];
-
-// update battery level
-static void battery_callback(BatteryChargeState state) {
-    s_battery_level = state.charge_percent;
-}
 
 // render selected text layer
 static void render_row(int row) {
@@ -50,7 +45,7 @@ static void render_row(int row) {
     } else if (row == TEXT_LAYER_RFFU) {
         snprintf(s_buffers[row], 15, "%02X %02X %02X %02X %02X", randoms[8], randoms[9], randoms[10], randoms[11], randoms[12]);
     } else if (row == TEXT_LAYER_STAT) {
-        snprintf(s_buffers[row], 15, "%02X %02X %02X %02X %02X", randoms[13], s_battery_level, randoms[14], s_battery_level, randoms[15]);
+        snprintf(s_buffers[row], 15, "%02X %02X %02X %02X %02X", randoms[13], s_connected, randoms[14], s_battery_level, randoms[15]);
     }
 
     if (row >= 0 && row < 6) {
@@ -142,9 +137,20 @@ static void update_time(bool init) {
 // callback for the time service
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
     update_time(false);
+}
 
-    battery_callback(battery_state_service_peek());
-    // TODO: BT connection
+// update battery level
+static void battery_callback(BatteryChargeState state) {
+    if (s_battery_level != state.charge_percent) {
+        s_battery_level = state.charge_percent;
+        render_row(TEXT_LAYER_STAT);
+    }
+}
+
+// update bt connection status
+static void connection_callback(bool connected) {
+    s_connected = connected ? 255 : 0;
+    render_row(TEXT_LAYER_STAT);
 }
 
 // initialize the different layers when the window is created
@@ -188,6 +194,10 @@ static void main_window_load(Window *window) {
 
 // free layers on destroy
 static void main_window_unload(Window *window) {
+    tick_timer_service_unsubscribe();
+    battery_state_service_unsubscribe();
+    connection_service_unsubscribe();
+
     for (int i = 0; i < 5; ++i) {
         text_layer_destroy(s_hex_layers[i]);
     }
@@ -211,14 +221,20 @@ static void init() {
 
     window_set_window_handlers(s_main_window, (WindowHandlers) {
             .load = main_window_load,
-            .unload = main_window_unload
-            });
+            .unload = main_window_unload,
+    });
 
     window_stack_push(s_main_window, true);
 
     update_time(true);
+    battery_callback(battery_state_service_peek());
+    connection_callback(bluetooth_connection_service_peek());
 
     tick_timer_service_subscribe(SECOND_UNIT, tick_handler);
+    battery_state_service_subscribe(battery_callback);
+    connection_service_subscribe((ConnectionHandlers) {
+            .pebble_app_connection_handler = connection_callback,
+    });
 }
 
 // deinitialize the main window and free memory
