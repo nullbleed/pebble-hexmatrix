@@ -1,12 +1,12 @@
 {
-  "name": "hex",
-  "author": "Daniel Jankowski",
+  "name": "hexmatrix",
+  "author": "Nullbleed",
   "version": "1.0.0",
-  "keywords": ["pebble-app"],
+  "keywords": ["pebble-app", "hex", "matrix", "hexmatrix"],
   "private": true,
   "dependencies": {},
   "pebble": {
-    "displayName": "hex",
+    "displayName": "hexmatrix",
     "uuid": "286c2d2e-1313-4564-a996-76fbbf744bf4",
     "sdkVersion": "3",
     "enableMultiJS": true,
