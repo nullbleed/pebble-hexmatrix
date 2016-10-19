@@ -19,7 +19,7 @@ In order to build this watchface you need the latest pebble sdk.
 - *Pebble Time 2 / Pebble Time Steel 2 (emery)* *(needs some improvements)*
 
 
-***hint** italic: only tested in emulator*
+* **hint** italic: only tested in emulator*
 
 
 ### License
