@@ -4,6 +4,9 @@ A pebble watchface which displays time and date in
 a hexadecimal matrix
 
 
+![Screenshots](./resources/images/screenshots.png)
+
+
 ### Build
 
 In order to build this watchface you need the latest pebble sdk.

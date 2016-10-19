@@ -150,6 +150,13 @@ static void battery_callback(BatteryChargeState state) {
 
 // update bt connection status
 static void connection_callback(bool connected) {
+    if (connected) {
+        vibes_double_pulse();
+        s_connected = 255;
+    } else {
+        vibes_double_pulse();
+        s_connected = 0;
+    }
     s_connected = connected ? 255 : 0;
     render_row(TEXT_LAYER_STAT);
 }
