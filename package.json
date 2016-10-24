@@ -2,13 +2,21 @@
   "name": "hexmatrix",
   "author": "Nullbleed",
   "version": "1.0.0",
-  "keywords": ["pebble-app", "hex", "matrix", "hexmatrix"],
+  "keywords": [
+    "pebble-app",
+    "hex",
+    "matrix",
+    "hexmatrix"
+  ],
   "private": true,
-  "dependencies": {},
+  "dependencies": {
+    "pebble-clay": "^1.0.3"
+  },
   "pebble": {
     "displayName": "hexmatrix",
     "uuid": "286c2d2e-1313-4564-a996-76fbbf744bf4",
     "sdkVersion": "3",
+    "capabilities": [ "configurable" ],
     "enableMultiJS": true,
     "targetPlatforms": [
       "aplite",
@@ -20,21 +28,25 @@
       "watchface": true
     },
     "messageKeys": [
-      "dummy"
+      "BackgroundColor",
+      "AccentColor",
+      "MainColor"
     ],
     "resources": {
-        "media": [{
-            "type": "font",
-            "name": "FONT_TERMINESS_24",
-            "file":"TerminusTTF-4.40.1.ttf",
-            "compatibility": "2.7"
+      "media": [
+        {
+          "type": "font",
+          "name": "FONT_TERMINESS_24",
+          "file": "TerminusTTF-4.40.1.ttf",
+          "compatibility": "2.7"
         },
         {
-            "type": "font",
-            "name": "FONT_TERMINESS_BOLD_24",
-            "file":"TerminusTTF-Bold-4.40.1.ttf",
-            "compatibility": "2.7"
-        }]
+          "type": "font",
+          "name": "FONT_TERMINESS_BOLD_24",
+          "file": "TerminusTTF-Bold-4.40.1.ttf",
+          "compatibility": "2.7"
+        }
+      ]
     }
   }
 }
