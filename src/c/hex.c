@@ -45,6 +45,10 @@ static int randoms[16];
 static char *s_buffers[6];
 static char s_time_buffer[15];
 
+// (dis-)connect vibe patterns
+static const uint32_t const short_vibe[] = { 80 };
+static const uint32_t const double_vibe[] = { 50, 100, 80 };
+
 // render selected text layer
 static void render_row(int row) {
     if (row == TEXT_LAYER_TIME) {
@@ -160,14 +164,24 @@ static void battery_callback(BatteryChargeState state) {
 
 // update bt connection status
 static void connection_callback(bool connected) {
+    if (connected == (s_connected == 255)) { // no change
+        return;
+    }
+
     if (connected) {
-        vibes_double_pulse();
+        vibes_enqueue_custom_pattern((VibePattern) {
+                .durations = short_vibe,
+                .num_segments = ARRAY_LENGTH(short_vibe),
+        });
         s_connected = 255;
     } else {
-        vibes_double_pulse();
+        vibes_enqueue_custom_pattern((VibePattern) {
+                .durations = double_vibe,
+                .num_segments = ARRAY_LENGTH(double_vibe),
+        });
         s_connected = 0;
     }
-    s_connected = connected ? 255 : 0;
+
     render_row(TEXT_LAYER_STAT);
 }
 
@@ -320,8 +334,13 @@ static void init() {
     window_stack_push(s_main_window, true);
 
     update_time(true);
-    battery_callback(battery_state_service_peek());
-    connection_callback(bluetooth_connection_service_peek());
+
+    BatteryChargeState state = battery_state_service_peek();
+    bool connected = bluetooth_connection_service_peek();
+
+    s_battery_level = state.charge_percent;
+    s_connected = connected ? 255 : 0;
+    render_row(TEXT_LAYER_STAT);
 
     tick_timer_service_subscribe(SECOND_UNIT, tick_handler);
     battery_state_service_subscribe(battery_callback);
