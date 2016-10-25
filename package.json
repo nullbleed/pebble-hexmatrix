@@ -30,7 +30,8 @@
     "messageKeys": [
       "BackgroundColor",
       "AccentColor",
-      "MainColor"
+      "MainColor",
+      "VibrateOnDisconnect"
     ],
     "resources": {
       "media": [

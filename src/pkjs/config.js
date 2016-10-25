@@ -39,6 +39,21 @@ module.exports = [
     ]
   },
   {
+    "type": "section",
+    "items": [
+      {
+        "type": "heading",
+        "defaultValue": "More Settings"
+      },
+      {
+        "type": "toggle",
+        "messageKey": "VibrateOnDisconnect",
+        "label": "Vibrate on disconnect",
+        "defaultValue": false
+      }
+    ]
+  },
+  {
     "type": "submit",
     "defaultValue": "Save Settings"
   }

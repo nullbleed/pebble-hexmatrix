@@ -14,6 +14,7 @@ typedef struct ClaySettings {
     GColor BackgroundColor;
     GColor AccentColor;
     GColor MainColor;
+    bool VibeOnDisconnect;
 } ClaySettings;
 
 static ClaySettings s_settings;
@@ -44,6 +45,8 @@ static int s_battery_level;
 static int randoms[16];
 static char *s_buffers[6];
 static char s_time_buffer[15];
+
+static bool s_vibe_on_disconnect;
 
 // (dis-)connect vibe patterns
 static const uint32_t const short_vibe[] = { 80 };
@@ -169,16 +172,20 @@ static void connection_callback(bool connected) {
     }
 
     if (connected) {
-        vibes_enqueue_custom_pattern((VibePattern) {
-                .durations = short_vibe,
-                .num_segments = ARRAY_LENGTH(short_vibe),
-        });
+        if (s_vibe_on_disconnect == true) {
+            vibes_enqueue_custom_pattern((VibePattern) {
+                    .durations = short_vibe,
+                    .num_segments = ARRAY_LENGTH(short_vibe),
+            });
+        }
         s_connected = 255;
     } else {
-        vibes_enqueue_custom_pattern((VibePattern) {
-                .durations = double_vibe,
-                .num_segments = ARRAY_LENGTH(double_vibe),
-        });
+        if (s_vibe_on_disconnect == true) {
+            vibes_enqueue_custom_pattern((VibePattern) {
+                    .durations = double_vibe,
+                    .num_segments = ARRAY_LENGTH(double_vibe),
+            });
+        }
         s_connected = 0;
     }
 
@@ -190,6 +197,7 @@ static void prv_default_settings() {
     s_settings.BackgroundColor = GColorBlack;
     s_settings.AccentColor = GColorCyan;
     s_settings.MainColor = GColorWhite;
+    s_settings.VibeOnDisconnect = false;
 }
 
 // update display with saved settings
@@ -201,6 +209,8 @@ static void prv_update_display() {
     s_background_color = s_settings.BackgroundColor;
     s_accent_color = s_settings.AccentColor;
     s_main_color = s_settings.MainColor;
+
+    s_vibe_on_disconnect = s_settings.VibeOnDisconnect;
 
     // update hex layers
     for (int i = 0; i < 5; ++i) {
@@ -244,6 +254,11 @@ static void prv_inbox_received_handler(DictionaryIterator *iter, void *context) 
     Tuple *fg_color_t = dict_find(iter, MESSAGE_KEY_MainColor);
     if(fg_color_t) {
         s_settings.MainColor = GColorFromHEX(fg_color_t->value->int32);
+    }
+
+    Tuple *vibe_on_disconnect_t = dict_find(iter, MESSAGE_KEY_VibrateOnDisconnect);
+    if (vibe_on_disconnect_t) {
+        s_settings.VibeOnDisconnect = vibe_on_disconnect_t->value->int32 == 1;
     }
 
     // save new settings
