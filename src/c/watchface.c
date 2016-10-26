@@ -208,7 +208,7 @@ void main_window_update_connection(bool connected) {
 
 void main_window_update_battery(int percent) {
     MainWindowData *data = window_get_user_data(s_main_window);
-    data->state.battery = percent;
+    data->state.battery = percent * 255 / 100;
 }
 
 void main_window_update_settings(ClaySettings* settings) {
