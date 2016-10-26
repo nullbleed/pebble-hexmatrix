@@ -4,11 +4,11 @@ A pebble watchface which displays time and date in
 a hexadecimal matrix
 
 
-![Pebble / Pebble Steel](https://www.filepicker.io/api/file/BLnNy9TfS7eNMuaG5KZZ/convert?h=168&w=144)
-![Pebble Time / Pebble Time Steel](https://www.filepicker.io/api/file/R2cXznutSrqxNfFiLiCk/convert?h=168&w=144)
-![Pebble Time Round](https://www.filepicker.io/api/file/ovmbq7erTeq5jXNqt7oM/convert?h=180&w=180)
+![Pebble / Pebble Steel](./screenshots/aplite_1.png)
+![Pebble Time / Pebble Time Steel](./screenshots/basalt_1.png)
+![Pebble Time Round](./screenshots/chalk_1.png)
 
-![Pebble 2](https://www.filepicker.io/api/file/TE8TD5G5QAqwGsGAWtMf/convert?h=168&w=144)
+![Pebble 2](./screenshots/diorite_1.png)
 
 
 ### Build
@@ -26,8 +26,10 @@ In order to build this watchface you need the latest pebble sdk.
 - *Pebble Time 2 / Pebble Time Steel 2 (emery)* *(needs some improvements)*
 
 
-* **hint** italic: only tested in emulator*
+**hint** italic: only tested in emulator*
 
+
+---
 
 ### License
 
