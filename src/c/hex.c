@@ -1,23 +1,11 @@
 #include <pebble.h>
-
-// persistent storage key
-#define SETTINGS_KEY        1
+#include "settings.h"
 
 #define TEXT_LAYER_DATE     0
 #define TEXT_LAYER_WEEKDAY  1
 #define TEXT_LAYER_TIME     2
 #define TEXT_LAYER_RFFU     3
 #define TEXT_LAYER_STAT     4
-
-// define our settings struct
-typedef struct ClaySettings {
-    GColor BackgroundColor;
-    GColor AccentColor;
-    GColor MainColor;
-    bool VibeOnDisconnect;
-} ClaySettings;
-
-static ClaySettings s_settings;
 
 static Window *s_main_window;
 static GFont s_font;
@@ -192,25 +180,17 @@ static void connection_callback(bool connected) {
     render_row(TEXT_LAYER_STAT);
 }
 
-// initialize the default settings
-static void prv_default_settings() {
-    s_settings.BackgroundColor = GColorBlack;
-    s_settings.AccentColor = GColorCyan;
-    s_settings.MainColor = GColorWhite;
-    s_settings.VibeOnDisconnect = false;
-}
-
-// update display with saved settings
-static void prv_update_display() {
-    // set main window color
-    window_set_background_color(s_main_window, s_settings.BackgroundColor);
-
+// update attributes according to changed settings
+static void settings_changed_handler(ClaySettings *settings) {
     // update time variables
-    s_background_color = s_settings.BackgroundColor;
-    s_accent_color = s_settings.AccentColor;
-    s_main_color = s_settings.MainColor;
+    s_background_color = settings->BackgroundColor;
+    s_accent_color = settings->AccentColor;
+    s_main_color = settings->MainColor;
 
-    s_vibe_on_disconnect = s_settings.VibeOnDisconnect;
+    s_vibe_on_disconnect = settings->VibeOnDisconnect;
+
+    // set main window color
+    window_set_background_color(s_main_window, s_background_color);
 
     // update hex layers
     for (int i = 0; i < 5; ++i) {
@@ -219,50 +199,6 @@ static void prv_update_display() {
 
     // update time layer
     text_layer_set_text_color(s_time_layer, s_main_color);
-}
-
-// read settings from persistent storage
-static void prv_load_settings() {
-    // load the default settings
-    prv_default_settings();
-
-    // read settings from persistent storage, if they exist
-    persist_read_data(SETTINGS_KEY, &s_settings, sizeof(s_settings));
-}
-
-// save the settings to persistent storage
-static void prv_save_settings() {
-    // write new setttings to persistent storage
-    persist_write_data(SETTINGS_KEY, &s_settings, sizeof(s_settings));
-
-    // update the display
-    prv_update_display();
-}
-
-static void prv_inbox_received_handler(DictionaryIterator *iter, void *context) {
-    // read color preferences
-    Tuple *bg_color_t = dict_find(iter, MESSAGE_KEY_BackgroundColor);
-    if(bg_color_t) {
-        s_settings.BackgroundColor = GColorFromHEX(bg_color_t->value->int32);
-    }
-
-    Tuple *ac_color_t = dict_find(iter, MESSAGE_KEY_AccentColor);
-    if(ac_color_t) {
-        s_settings.AccentColor = GColorFromHEX(ac_color_t->value->int32);
-    }    
-
-    Tuple *fg_color_t = dict_find(iter, MESSAGE_KEY_MainColor);
-    if(fg_color_t) {
-        s_settings.MainColor = GColorFromHEX(fg_color_t->value->int32);
-    }
-
-    Tuple *vibe_on_disconnect_t = dict_find(iter, MESSAGE_KEY_VibrateOnDisconnect);
-    if (vibe_on_disconnect_t) {
-        s_settings.VibeOnDisconnect = vibe_on_disconnect_t->value->int32 == 1;
-    }
-
-    // save new settings
-    prv_save_settings();
 }
 
 // initialize the different layers when the window is created
@@ -304,16 +240,10 @@ static void main_window_load(Window *window) {
         layer_add_child(window_layer, text_layer_get_layer(s_hex_layers[i]));
     }
     layer_add_child(window_layer, text_layer_get_layer(s_time_layer));
-
-    prv_update_display();
 }
 
 // free layers on destroy
 static void main_window_unload(Window *window) {
-    tick_timer_service_unsubscribe();
-    battery_state_service_unsubscribe();
-    connection_service_unsubscribe();
-
     for (int i = 0; i < 5; ++i) {
         text_layer_destroy(s_hex_layers[i]);
     }
@@ -333,14 +263,16 @@ static void init() {
         s_buffers[i] = calloc(15, sizeof(char));
     }
 
-    prv_load_settings();
+    // load settings
+    ClaySettings *settings = settings_load();
 
-    // Open AppMessage connection
-    app_message_register_inbox_received(prv_inbox_received_handler);
-    app_message_open(128, 128);
+    s_background_color = settings->BackgroundColor;
+    s_accent_color = settings->AccentColor;
+    s_main_color = settings->MainColor;
+    s_vibe_on_disconnect = settings->VibeOnDisconnect;
 
+    // create main window
     s_main_window = window_create();
-
     window_set_window_handlers(s_main_window, (WindowHandlers) {
             .load = main_window_load,
             .unload = main_window_unload,
@@ -348,6 +280,7 @@ static void init() {
 
     window_stack_push(s_main_window, true);
 
+    // update time and status data
     update_time(true);
 
     BatteryChargeState state = battery_state_service_peek();
@@ -357,15 +290,22 @@ static void init() {
     s_connected = connected ? 255 : 0;
     render_row(TEXT_LAYER_STAT);
 
+    // subscribe to events
     tick_timer_service_subscribe(SECOND_UNIT, tick_handler);
     battery_state_service_subscribe(battery_callback);
     connection_service_subscribe((ConnectionHandlers) {
             .pebble_app_connection_handler = connection_callback,
     });
+
+    settings_register_settings_changed(settings_changed_handler);
 }
 
 // deinitialize the main window and free memory
 static void deinit() {
+    tick_timer_service_unsubscribe();
+    battery_state_service_unsubscribe();
+    connection_service_unsubscribe();
+
     window_destroy(s_main_window);
 }
 
