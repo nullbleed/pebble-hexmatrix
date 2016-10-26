@@ -4,7 +4,11 @@ A pebble watchface which displays time and date in
 a hexadecimal matrix
 
 
-![Screenshots](./resources/images/screenshots.png)
+![Pebble / Pebble Steel](https://www.filepicker.io/api/file/BLnNy9TfS7eNMuaG5KZZ/convert?h=168&w=144)
+![Pebble Time / Pebble Time Steel](https://www.filepicker.io/api/file/R2cXznutSrqxNfFiLiCk/convert?h=168&w=144)
+![Pebble Time Round](https://www.filepicker.io/api/file/ovmbq7erTeq5jXNqt7oM/convert?h=180&w=180)
+
+![Pebble 2](https://www.filepicker.io/api/file/TE8TD5G5QAqwGsGAWtMf/convert?h=168&w=144)
 
 
 ### Build
