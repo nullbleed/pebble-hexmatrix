@@ -204,11 +204,13 @@ void main_window_update_time(bool init) {
 void main_window_update_connection(bool connected) {
     MainWindowData *data = window_get_user_data(s_main_window);
     data->state.connection = connected ? 255 : 0;
+    render_row(TEXT_LAYER_STAT);
 }
 
 void main_window_update_battery(int percent) {
     MainWindowData *data = window_get_user_data(s_main_window);
     data->state.battery = percent * 255 / 100;
+    render_row(TEXT_LAYER_STAT);
 }
 
 void main_window_update_settings(ClaySettings* settings) {
