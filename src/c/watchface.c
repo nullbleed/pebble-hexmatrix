@@ -13,7 +13,11 @@ static void render_row(int row) {
     if (row == TEXT_LAYER_DATE) {
         snprintf(data->buffers.hex_buffers[row], 15, "%01X %02X %02X %02X %01X", s_randoms[0] % 16, date->day, date->month, date->year, s_randoms[1] % 16);
     } else if (row == TEXT_LAYER_WEEKDAY) {
-        snprintf(data->buffers.hex_buffers[row], 15, "%01X %02X %02X %02X %01X", s_randoms[2] % 16, s_randoms[3], date->weekday, s_randoms[4], s_randoms[5] % 16);
+        if (data->use_12_hours) {
+            snprintf(data->buffers.hex_buffers[row], 15, "%01X %02X %02X %02X %01X", s_randoms[2] % 16, date->weekday, s_randoms[3], date->is_afternoon, s_randoms[5] % 16);
+        } else {
+            snprintf(data->buffers.hex_buffers[row], 15, "%01X %02X %02X %02X %01X", s_randoms[2] % 16, s_randoms[3], date->weekday, s_randoms[4], s_randoms[5] % 16);
+        }
     } else if (row == TEXT_LAYER_TIME) {
         snprintf(data->buffers.hex_buffers[row], 15, "%01X          %01X", s_randoms[6] % 16, s_randoms[7] % 16);
     } else if (row == TEXT_LAYER_RFFU) {
@@ -43,6 +47,9 @@ static void main_window_load(Window *window) {
 
     MainWindowData *data = window_get_user_data(window);
 
+    // get 12/24h preference
+    data->use_12_hours = (! clock_is_24h_style());
+
     // set the background color for the root window
     window_set_background_color(s_main_window, data->colors.bg);
 
@@ -70,7 +77,7 @@ static void main_window_load(Window *window) {
     text_layer_set_text_color(time_layer, data->colors.main);
     text_layer_set_font(time_layer, data->font_bold);
     text_layer_set_text_alignment(time_layer, GTextAlignmentCenter);
-    
+
     // add the layers to the main window
     for (int i = 0; i < 5; ++i) {
         layer_add_child(window_layer, text_layer_get_layer(data->layers.hex_layers[i]));
@@ -131,54 +138,46 @@ void main_window_update_time(bool init) {
     time_t temp = time(NULL);
     struct tm *tick_time = localtime(&temp);
 
-    // get seconds as int
-    static char s_second_buffer[8];
-    strftime(s_second_buffer, sizeof(s_second_buffer), "%S", tick_time);
-    date->second = atoi(s_second_buffer);
-
     if (init) {
         srand(temp);
     }
-    
+
+    // get seconds
+    date->second = tick_time->tm_sec;
+    bool midnight = (tick_time->tm_hour == 0);
+
     // generate randoms
     if (date->second == 0 || init) {
         for (int i = 0; i < 16; ++i) {
             s_randoms[i] = rand() % 256;
-        } 
+        }
     }
 
     if (date->second == 0 || init) { // EOM
-        // get minutes as int
-        static char s_minute_buffer[8];
-        strftime(s_minute_buffer, sizeof(s_minute_buffer), "%M", tick_time);
-        date->minute = atoi(s_minute_buffer);
+        // get minutes
+        date->minute = tick_time->tm_min;
 
         if (date->minute == 0 || init) { // EOH
-            // get hours as int
-            static char s_hour_buffer[8];
-            strftime(s_hour_buffer, sizeof(s_hour_buffer), "%H", tick_time);
-            date->hour = atoi(s_hour_buffer);
+            // get hours according to 12/24h style
+            if (data->use_12_hours) {
+                date->hour = ((tick_time->tm_hour + 11) % 12) + 1;
+                date->is_afternoon = (tick_time->tm_hour > 11) ? 255 : 0;
+            } else {
+                date->hour = tick_time->tm_hour;
+            }
 
-            if (date->hour == 0 || init) { // EOD
+            if (midnight || init) { // EOD
                 // get day as int
-                static char s_day_buffer[8];
-                strftime(s_day_buffer, sizeof(s_day_buffer), "%d", tick_time);
-                date->day = atoi(s_day_buffer);
+                date->day = tick_time->tm_mday;
 
                 // get weekday as int
-                static char s_weekday_buffer[8];
-                strftime(s_weekday_buffer, sizeof(s_weekday_buffer), "%w", tick_time);
-                date->weekday = ((atoi(s_weekday_buffer) + 6) % 7) + 1;
+                date->weekday = ((tick_time->tm_wday + 6 ) % 7) + 1;
 
                 // get month as int
-                static char s_month_buffer[8];
-                strftime(s_month_buffer, sizeof(s_month_buffer), "%m", tick_time);
-                date->month = atoi(s_month_buffer);
+                date->month = tick_time->tm_mon + 1;
 
                 // get year as int
-                static char s_year_buffer[8];
-                strftime(s_year_buffer, sizeof(s_year_buffer), "%y", tick_time);
-                date->year = atoi(s_year_buffer);
+                date->year = tick_time->tm_year % 100;
 
                 // display updated date
                 render_row(TEXT_LAYER_DATE);
@@ -191,7 +190,7 @@ void main_window_update_time(bool init) {
     render_time();
 
     if (date->second == 0 || init) {
-        if (date->hour != 0) {
+        if (!midnight) { // else is already rendered above
             render_row(TEXT_LAYER_DATE);
             render_row(TEXT_LAYER_WEEKDAY);
         }

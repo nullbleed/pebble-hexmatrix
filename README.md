@@ -1,7 +1,7 @@
 # pebble-hexmatrix
 
 A pebble watchface which displays time and date in
-a hexadecimal matrix
+a hexadecimal matrix.
 
 
 ![Pebble / Pebble Steel](./screenshots/aplite_1.png)
@@ -9,6 +9,13 @@ a hexadecimal matrix
 ![Pebble Time Round](./screenshots/chalk_1.png)
 
 ![Pebble 2](./screenshots/diorite_1.png)
+
+
+### Features
+
+- Vibrate on connection loss / reconnect.
+- Selectable colors for background, foreground, and time.
+- 24h/12h mode.
 
 
 ### Build

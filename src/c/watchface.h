@@ -16,6 +16,7 @@ typedef struct Date {
     int month;
     int year;
     int weekday;
+    int is_afternoon;
 } Date;
 
 typedef struct State {
@@ -41,6 +42,7 @@ typedef struct MainWindowData {
     } buffers;
     Date date;
     State state;
+    bool use_12_hours;
 } MainWindowData;
 
 void main_window_push();
